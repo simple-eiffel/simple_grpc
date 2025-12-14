@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>simple_grpc - gRPC Protocol for Eiffel</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="images/logo.png" alt="simple_* logo" class="logo">
+        </div>
+        <h1>simple_grpc</h1>
+        <p class="tagline">gRPC Protocol for Eiffel</p>
+        <div class="badges">
+            <span class="badge badge-version">v1.0.0</span>
+            <span class="badge badge-license">MIT</span>
+        </div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#installation">Installation</a></li>
+            <li><a href="https://github.com/simple-eiffel/simple_grpc">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="overview">
+            <h2>Overview</h2>
+            <p>
+                <strong>simple_grpc</strong> provides gRPC protocol support for Eiffel applications
+                including Protocol Buffers, HTTP/2 transport, streaming RPC, and service definitions.
+            </p>
+            <p>Part of the <a href="https://github.com/simple-eiffel">Simple Eiffel</a> ecosystem.</p>
+
+            <div class="quick-start">
+                <h3>Quick Start</h3>
+                <pre><code><span class="keyword">local</span>
+    client: <span class="type">SIMPLE_GRPC_CLIENT</span>
+    request: <span class="type">SIMPLE_PROTOBUF_MESSAGE</span>
+<span class="keyword">do</span>
+    <span class="keyword">create</span> client.make (<span class="string">"localhost:50051"</span>)
+    <span class="keyword">create</span> request.make
+    request.set_field (<span class="string">"name"</span>, <span class="string">"World"</span>)
+    <span class="keyword">if</span> <span class="keyword">attached</span> client.call (<span class="string">"Greeter/SayHello"</span>, request) <span class="keyword">as</span> response <span class="keyword">then</span>
+        print (response.string_field (<span class="string">"message"</span>))
+    <span class="keyword">end</span>
+<span class="keyword">end</span></code></pre>
+            </div>
+        </section>
+
+        <section id="features">
+            <h2>Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>Protocol Buffers</h4>
+                    <p>Efficient binary serialization with protobuf support</p>
+                </div>
+                <div class="feature-card">
+                    <h4>HTTP/2 Transport</h4>
+                    <p>Modern HTTP/2 based communication protocol</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Streaming RPC</h4>
+                    <p>Unary, server, client, and bidirectional streaming</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Service Definitions</h4>
+                    <p>Define services with request/response types</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="installation">
+            <h2>Installation</h2>
+            <pre><code><span class="comment"># Set environment variable</span>
+export SIMPLE_GRPC=/path/to/simple_grpc
+
+<span class="comment"># Add to ECF</span>
+&lt;library name="simple_grpc" location="$SIMPLE_GRPC/simple_grpc.ecf"/&gt;</code></pre>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 simple_* ecosystem. MIT License.</p>
+        <p>
+            <a href="https://github.com/simple-eiffel/simple_grpc">GitHub</a> |
+            <a href="https://simple-eiffel.github.io">Documentation</a>
+        </p>
+    </footer>
+</body>
+</html>
