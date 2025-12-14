@@ -1,0 +1,9 @@
+{
+  "name": "simple_grpc",
+  "version": "0.1.0",
+  "description": "gRPC protocol for Eiffel: Protocol Buffers, HTTP/2, streaming RPC, service definitions",
+  "author": "Larry Rix",
+  "license": "MIT",
+  "category": "networking",
+  "keywords": ["grpc", "protobuf", "rpc", "http2"]
+}
