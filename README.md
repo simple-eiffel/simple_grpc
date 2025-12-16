@@ -53,14 +53,14 @@ end
 
 ## Installation
 
-1. Set environment variable:
+1. Set the ecosystem environment variable (one-time setup for all simple_* libraries):
 ```bash
-export SIMPLE_GRPC=/path/to/simple_grpc
+export SIMPLE_EIFFEL=D:\prod
 ```
 
 2. Add to ECF:
 ```xml
-<library name="simple_grpc" location="$SIMPLE_GRPC/simple_grpc.ecf"/>
+<library name="simple_grpc" location="$SIMPLE_EIFFEL/simple_grpc/simple_grpc.ecf"/>
 ```
 
 ## Method Types
