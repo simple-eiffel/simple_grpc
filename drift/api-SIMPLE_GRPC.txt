@@ -1,0 +1,467 @@
+note
+	description: "[
+				gRPC protocol facade for Eiffel.
+		
+				Provides factory methods for gRPC components:
+				- Channels: Connection to gRPC servers
+				- Services: Service definitions with methods
+				- Methods: RPC method definitions
+				- Calls: Active RPC invocations
+				- Messages: Protocol Buffers messages
+				- Status: gRPC status codes
+		
+				Example usage:
+					grpc := create {SIMPLE_GRPC}.make
+		
+					-- Create channel
+					channel := grpc.new_channel ("localhost", 50051)
+					channel.set_plaintext
+					channel.connect
+		
+					-- Create service
+					service := grpc.new_service ("helloworld.Greeter")
+					service.add_unary_method ("SayHello", "HelloRequest", "HelloReply")
+		
+					-- Create and execute call
+					call := channel.new_call (service, "SayHello")
+					request := grpc.new_message
+					request.set_string (1, "World")
+					call.set_request (request)
+					call.start
+					...
+	]"
+	author: "Larry Rix"
+	date: "$Date$"
+	revision: "$Revision$"
+
+class interface
+	SIMPLE_GRPC
+
+create 
+	make
+			-- Create gRPC facade.
+
+feature -- Access
+
+	generating_type: TYPE [detachable SIMPLE_GRPC]
+			-- Type of current object
+			-- (type of which it is a direct instance)
+			-- (from ANY)
+		ensure -- from ANY
+			generating_type_not_void: Result /= Void
+
+	generator: STRING_8
+			-- Name of current object's generating class
+			-- (base class of the type of which it is a direct instance)
+			-- (from ANY)
+		ensure -- from ANY
+			generator_not_void: Result /= Void
+			generator_not_empty: not Result.is_empty
+	
+feature -- Comparison
+
+	frozen deep_equal (a: detachable ANY; b: like arg #1): BOOLEAN
+			-- Are `a` and `b` either both void
+			-- or attached to isomorphic object structures?
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+			shallow_implies_deep: standard_equal (a, b) implies Result
+			both_or_none_void: (a = Void) implies (Result = (b = Void))
+			same_type: (Result and (a /= Void)) implies (b /= Void and then a.same_type (b))
+			symmetric: Result implies deep_equal (b, a)
+
+	frozen equal (a: detachable ANY; b: like arg #1): BOOLEAN
+			-- Are `a` and `b` either both void or attached
+			-- to objects considered equal?
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+			definition: Result = (a = Void and b = Void) or else ((a /= Void and b /= Void) and then a.is_equal (b))
+
+	frozen is_deep_equal alias "≡≡≡" (other: SIMPLE_GRPC): BOOLEAN
+			-- Are `Current` and `other` attached to isomorphic object structures?
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+		ensure -- from ANY
+			shallow_implies_deep: standard_is_equal (other) implies Result
+			same_type: Result implies same_type (other)
+			symmetric: Result implies other.is_deep_equal (Current)
+
+	is_equal (other: SIMPLE_GRPC): BOOLEAN
+			-- Is `other` attached to an object considered
+			-- equal to current object?
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+		ensure -- from ANY
+			symmetric: Result implies other ~ Current
+			consistent: standard_is_equal (other) implies Result
+
+	frozen standard_equal (a: detachable ANY; b: like arg #1): BOOLEAN
+			-- Are `a` and `b` either both void or attached to
+			-- field-by-field identical objects of the same type?
+			-- Always uses default object comparison criterion.
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+			definition: Result = (a = Void and b = Void) or else ((a /= Void and b /= Void) and then a.standard_is_equal (b))
+
+	frozen standard_is_equal alias "≜" (other: SIMPLE_GRPC): BOOLEAN
+			-- Is `other` attached to an object of the same type
+			-- as current object, and field-by-field identical to it?
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+		ensure -- from ANY
+			same_type: Result implies same_type (other)
+			symmetric: Result implies other.standard_is_equal (Current)
+	
+feature -- Status report
+
+	conforms_to (other: ANY): BOOLEAN
+			-- Does type of current object conform to type
+			-- of `other` (as per Eiffel: The Language, chapter 13)?
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+
+	same_type (other: ANY): BOOLEAN
+			-- Is type of current object identical to type of `other`?
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+		ensure -- from ANY
+			definition: Result = (conforms_to (other) and other.conforms_to (Current))
+	
+feature -- Duplication
+
+	copy (other: SIMPLE_GRPC)
+			-- Update current object using fields of object attached
+			-- to `other`, so as to yield equal objects.
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+			type_identity: same_type (other)
+		ensure -- from ANY
+			is_equal: Current ~ other
+
+	frozen deep_copy (other: SIMPLE_GRPC)
+			-- Effect equivalent to that of:
+			--		`copy` (`other` . `deep_twin`)
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+		ensure -- from ANY
+			deep_equal: deep_equal (Current, other)
+
+	frozen deep_twin: SIMPLE_GRPC
+			-- New object structure recursively duplicated from Current.
+			-- (from ANY)
+		ensure -- from ANY
+			deep_twin_not_void: Result /= Void
+			deep_equal: deep_equal (Current, Result)
+
+	frozen standard_copy (other: SIMPLE_GRPC)
+			-- Copy every field of `other` onto corresponding field
+			-- of current object.
+			-- (from ANY)
+		require -- from ANY
+			other_not_void: other /= Void
+			type_identity: same_type (other)
+		ensure -- from ANY
+			is_standard_equal: standard_is_equal (other)
+
+	frozen standard_twin: SIMPLE_GRPC
+			-- New object field-by-field identical to `other`.
+			-- Always uses default copying semantics.
+			-- (from ANY)
+		ensure -- from ANY
+			standard_twin_not_void: Result /= Void
+			equal: standard_equal (Result, Current)
+
+	frozen twin: SIMPLE_GRPC
+			-- New object equal to `Current`
+			-- `twin` calls `copy`; to change copying/twinning semantics, redefine `copy`.
+			-- (from ANY)
+		ensure -- from ANY
+			twin_not_void: Result /= Void
+			is_equal: Result ~ Current
+	
+feature -- Basic operations
+
+	frozen default: detachable SIMPLE_GRPC
+			-- Default value of object's type
+			-- (from ANY)
+
+	frozen default_pointer: POINTER
+			-- Default value of type `POINTER`
+			-- (Avoid the need to write `p`.`default` for
+			-- some `p` of type `POINTER`.)
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+
+	default_rescue
+			-- Process exception for routines with no Rescue clause.
+			-- (Default: do nothing.)
+			-- (from ANY)
+
+	frozen do_nothing
+			-- Execute a null action.
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+	
+feature -- Channel Factory
+
+	new_channel (a_host: READABLE_STRING_8; a_port: INTEGER_32): SIMPLE_GRPC_CHANNEL
+			-- Create a new channel to host:port.
+		require
+			host_not_empty: not a_host.is_empty
+			valid_port: a_port > 0 and a_port <= 65535
+		ensure
+			result_created: Result /= Void
+
+	new_plaintext_channel (a_host: READABLE_STRING_8; a_port: INTEGER_32): SIMPLE_GRPC_CHANNEL
+			-- Create a new plaintext channel.
+		require
+			host_not_empty: not a_host.is_empty
+			valid_port: a_port > 0 and a_port <= 65535
+		ensure
+			result_created: Result /= Void
+			is_plaintext: Result.is_plaintext
+	
+feature -- HTTP/2 Frame Factory
+
+	new_http2_data_frame (a_stream_id: INTEGER_32; a_data: ARRAY [NATURAL_8]; a_end_stream: BOOLEAN): SIMPLE_HTTP2_FRAME
+			-- Create HTTP/2 DATA frame.
+		require
+			valid_stream_id: a_stream_id > 0
+		ensure
+			result_created: Result /= Void
+			is_data: Result.is_data
+
+	new_http2_headers_frame (a_stream_id: INTEGER_32; a_headers: ARRAY [NATURAL_8]; a_end_stream: BOOLEAN): SIMPLE_HTTP2_FRAME
+			-- Create HTTP/2 HEADERS frame.
+		require
+			valid_stream_id: a_stream_id > 0
+		ensure
+			result_created: Result /= Void
+			is_headers: Result.is_headers
+
+	new_http2_settings_ack: SIMPLE_HTTP2_FRAME
+			-- Create HTTP/2 SETTINGS ACK frame.
+		ensure
+			result_created: Result /= Void
+			is_settings: Result.is_settings
+			is_ack: Result.is_ack
+
+	new_http2_settings_frame (a_settings: ARRAY [TUPLE [id: INTEGER_32; value: INTEGER_32]]): SIMPLE_HTTP2_FRAME
+			-- Create HTTP/2 SETTINGS frame.
+		ensure
+			result_created: Result /= Void
+			is_settings: Result.is_settings
+	
+feature -- Message Factory
+
+	new_message: SIMPLE_PROTOBUF_MESSAGE
+			-- Create a new empty message.
+		ensure
+			result_created: Result /= Void
+
+	new_message_with_name (a_name: READABLE_STRING_8): SIMPLE_PROTOBUF_MESSAGE
+			-- Create a new message with type name.
+		require
+			name_not_empty: not a_name.is_empty
+		ensure
+			result_created: Result /= Void
+	
+feature -- Metadata Factory
+
+	new_metadata: SIMPLE_GRPC_METADATA
+			-- Create empty metadata.
+		ensure
+			result_created: Result /= Void
+	
+feature -- Method Factory
+
+	new_bidirectional_method (a_name: READABLE_STRING_8; a_request_type: READABLE_STRING_8; a_response_type: READABLE_STRING_8): SIMPLE_GRPC_METHOD
+			-- Create a new bidirectional streaming method.
+		require
+			name_not_empty: not a_name.is_empty
+		ensure
+			result_created: Result /= Void
+			is_bidirectional: Result.is_bidirectional
+
+	new_client_streaming_method (a_name: READABLE_STRING_8; a_request_type: READABLE_STRING_8; a_response_type: READABLE_STRING_8): SIMPLE_GRPC_METHOD
+			-- Create a new client streaming method.
+		require
+			name_not_empty: not a_name.is_empty
+		ensure
+			result_created: Result /= Void
+			is_client_streaming: Result.is_client_streaming
+
+	new_server_streaming_method (a_name: READABLE_STRING_8; a_request_type: READABLE_STRING_8; a_response_type: READABLE_STRING_8): SIMPLE_GRPC_METHOD
+			-- Create a new server streaming method.
+		require
+			name_not_empty: not a_name.is_empty
+		ensure
+			result_created: Result /= Void
+			is_server_streaming: Result.is_server_streaming
+
+	new_unary_method (a_name: READABLE_STRING_8; a_request_type: READABLE_STRING_8; a_response_type: READABLE_STRING_8): SIMPLE_GRPC_METHOD
+			-- Create a new unary method.
+		require
+			name_not_empty: not a_name.is_empty
+		ensure
+			result_created: Result /= Void
+			is_unary: Result.is_unary
+	
+feature -- Output
+
+	Io: STD_FILES
+			-- Handle to standard file setup
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+			io_not_void: Result /= Void
+
+	out: STRING_8
+			-- New string containing terse printable representation
+			-- of current object
+			-- (from ANY)
+		ensure -- from ANY
+			out_not_void: Result /= Void
+
+	print (o: detachable ANY)
+			-- Write terse external representation of `o`
+			-- on standard output.
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+
+	frozen tagged_out: STRING_8
+			-- New string containing terse printable representation
+			-- of current object
+			-- (from ANY)
+		ensure -- from ANY
+			tagged_out_not_void: Result /= Void
+	
+feature -- Platform
+
+	Operating_environment: OPERATING_ENVIRONMENT
+			-- Objects available from the operating system
+			-- (from ANY)
+		ensure -- from ANY
+			instance_free: class
+			operating_environment_not_void: Result /= Void
+	
+feature -- Protocol Buffers Factory
+
+	new_protobuf: SIMPLE_PROTOBUF
+			-- Create a new Protocol Buffers encoder/decoder.
+		ensure
+			result_created: Result /= Void
+
+	new_protobuf_field_bool (a_number: INTEGER_32; a_value: BOOLEAN): SIMPLE_PROTOBUF_FIELD
+			-- Create a bool field.
+		require
+			valid_number: a_number >= 1
+		ensure
+			result_created: Result /= Void
+
+	new_protobuf_field_int32 (a_number: INTEGER_32; a_value: INTEGER_32): SIMPLE_PROTOBUF_FIELD
+			-- Create an int32 field.
+		require
+			valid_number: a_number >= 1
+		ensure
+			result_created: Result /= Void
+
+	new_protobuf_field_string (a_number: INTEGER_32; a_value: READABLE_STRING_8): SIMPLE_PROTOBUF_FIELD
+			-- Create a string field.
+		require
+			valid_number: a_number >= 1
+		ensure
+			result_created: Result /= Void
+	
+feature -- Service Factory
+
+	new_service (a_name: READABLE_STRING_8): SIMPLE_GRPC_SERVICE
+			-- Create a new service definition.
+		require
+			name_not_empty: not a_name.is_empty
+		ensure
+			result_created: Result /= Void
+	
+feature -- Status Code Constants (convenience)
+
+	Status_aborted: INTEGER_32 = 10
+
+	Status_already_exists: INTEGER_32 = 6
+
+	Status_cancelled: INTEGER_32 = 1
+
+	Status_data_loss: INTEGER_32 = 15
+
+	Status_deadline_exceeded: INTEGER_32 = 4
+
+	Status_failed_precondition: INTEGER_32 = 9
+
+	Status_internal: INTEGER_32 = 13
+
+	Status_invalid_argument: INTEGER_32 = 3
+
+	Status_not_found: INTEGER_32 = 5
+
+	Status_ok: INTEGER_32 = 0
+
+	Status_out_of_range: INTEGER_32 = 11
+
+	Status_permission_denied: INTEGER_32 = 7
+
+	Status_resource_exhausted: INTEGER_32 = 8
+
+	Status_unauthenticated: INTEGER_32 = 16
+
+	Status_unavailable: INTEGER_32 = 14
+
+	Status_unimplemented: INTEGER_32 = 12
+
+	Status_unknown: INTEGER_32 = 2
+	
+feature -- Status Factory
+
+	new_status (a_code: INTEGER_32; a_message: READABLE_STRING_8): SIMPLE_GRPC_STATUS
+			-- Create status with code and message.
+		require
+			valid_code: a_code >= 0 and a_code <= 16
+		ensure
+			result_created: Result /= Void
+
+	new_status_error (a_code: INTEGER_32; a_message: READABLE_STRING_8): SIMPLE_GRPC_STATUS
+			-- Create error status.
+		require
+			is_error_code: a_code > 0 and a_code <= 16
+		ensure
+			result_created: Result /= Void
+			is_error: Result.is_error
+
+	new_status_ok: SIMPLE_GRPC_STATUS
+			-- Create OK status.
+		ensure
+			result_created: Result /= Void
+			is_ok: Result.is_ok
+	
+invariant
+		-- from ANY
+	reflexive_equality: standard_is_equal (Current)
+	reflexive_conformance: conforms_to (Current)
+
+note
+	copyright: "Copyright (c) 2025, Larry Rix"
+	license: "MIT License"
+
+end -- class SIMPLE_GRPC
+
