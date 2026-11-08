@@ -93,6 +93,7 @@ feature {NONE} -- Initialization
 			io.put_string ("------------------%N")
 			run_test (agent tests.test_new_channel, "test_new_channel")
 			run_test (agent tests.test_channel_plaintext, "test_channel_plaintext")
+			run_test (agent tests.test_channel_tls_not_offered, "test_channel_tls_not_offered")
 			run_test (agent tests.test_channel_authority, "test_channel_authority")
 			run_test (agent tests.test_channel_connect, "test_channel_connect")
 

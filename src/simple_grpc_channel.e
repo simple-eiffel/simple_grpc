@@ -93,6 +93,10 @@ feature -- Status
 	is_plaintext: BOOLEAN
 			-- Is this a plaintext (non-TLS) connection?
 
+	is_tls_supported: BOOLEAN = False
+			-- Can this channel encrypt? Not yet: TLS is not implemented, so `set_tls'
+			-- refuses rather than label a plain connection "https".
+
 	is_ready: BOOLEAN
 			-- Is channel ready for calls?
 		do
@@ -124,13 +128,17 @@ feature -- Configuration
 		end
 
 	set_tls
-			-- Use TLS (not implemented in Phase 1).
+			-- Use TLS, once it is implemented. Until then this may not be called.
 		require
 			not_connected: state = state_idle
+			tls_supported: is_tls_supported
 		do
-			is_plaintext := False
+			if is_tls_supported then
+				is_plaintext := False
+			end
 		ensure
-			not_plaintext: not is_plaintext
+			tls_when_supported: is_tls_supported implies not is_plaintext
+			still_plain_otherwise: not is_tls_supported implies is_plaintext = old is_plaintext
 		end
 
 	set_default_timeout (a_timeout_ms: INTEGER)
