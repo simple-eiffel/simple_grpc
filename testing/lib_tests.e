@@ -484,6 +484,17 @@ feature -- gRPC Channel Tests
 			assert ("is_plaintext", channel.is_plaintext)
 		end
 
+	test_channel_tls_not_offered
+			-- TLS is not implemented: the channel says so and stays plaintext, so its
+			-- requests are not labelled "https" while sent in the clear.
+		local
+			channel: SIMPLE_GRPC_CHANNEL
+		do
+			create channel.make ("localhost", 50051)
+			assert ("tls_not_supported", not channel.is_tls_supported)
+			assert ("plaintext_by_default", channel.is_plaintext)
+		end
+
 	test_channel_authority
 			-- Test authority header generation.
 		local
